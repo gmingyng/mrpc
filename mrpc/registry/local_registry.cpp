@@ -5,29 +5,27 @@ namespace mrpc{
 LocalRegistry::LocalRegistry() 
     : reg_latch_(std::make_shared<std::shared_mutex>()) {}
 
-template <typename T>
-void LocalRegistry::Register(const std::string& service_name, T service) {
+void LocalRegistry::Register(const std::string& service_name, ServiceSPtr service) {
     std::unique_lock latch(*reg_latch_);
-    call_handlers_[service_name] = service;
+    handler_table_[service_name] = service;
 }
 
-template <typename T>
-auto LocalRegistry::Get(std::string service_name) -> std::optional<T> {
+auto LocalRegistry::Get(std::string service_name) -> std::optional<ServiceSPtr> {
     std::shared_lock latch(*reg_latch_);
 
-    auto it = call_handlers_.find(service_name);
-    if(it == call_handlers_.end()) {
+    auto it = handler_table_.find(service_name);
+    if(it == handler_table_.end()) {
         return std::nullopt;
     }
-    return std::make_optional<T>(it->second);
+    return std::make_optional<ServiceSPtr>(it->second);
 }
 
 void LocalRegistry::Remove(const std::string& service_name) {
     std::unique_lock latch(*reg_latch_);
 
-    auto it = call_handlers_.find(service_name);
-    if(it != call_handlers_.end()) {
-        call_handlers_.erase(it);
+    auto it = handler_table_.find(service_name);
+    if(it != handler_table_.end()) {
+        handler_table_.erase(it);
     }
 }
 

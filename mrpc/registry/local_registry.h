@@ -8,28 +8,25 @@
 #include <optional>
 #include <mutex>
 #include "../Serializer.h"
-#include "../registry/local_registry.h"
-#include "../server/base_service.hpp"
+#include "../server/base_service.h"
 
 namespace mrpc{
 
-using ServiceFunc = std::function<void(Serializer*, const char*, int)>;
+using ServiceSPtr = std::shared_ptr<BaseService>;
 
 class LocalRegistry
 {
 public:
     LocalRegistry();
     ~LocalRegistry() = default;
+    
+    void Register(const std::string& service_name, ServiceSPtr service);
 
-    template <typename T>
-    void Register(const std::string& service_name, T service);
-
-    template <typename T>
-    auto Get(std::string service_name) -> std::optional<T>;
+    auto Get(std::string service_name) -> std::optional<ServiceSPtr>;
 
     void Remove(const std::string& service_name);
 private:
-    std::unordered_map<std::string, std::shared_ptr<BaseService>> call_handlers_;
+    std::unordered_map<std::string, ServiceSPtr> handler_table_;
     std::shared_ptr<std::shared_mutex> reg_latch_;
 };
 

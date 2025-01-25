@@ -9,20 +9,26 @@
 #include <errno.h>
 #include <string>
 
+#include "../rpc_msg/rpc_msg.pb.h"
 
 namespace mrpc{
 
+/*
+* 仅进行数据传输，解析交由服务器端
+*/
 class TcpSocket{
 public:
     explicit TcpSocket(const std::string& address, uint16_t port);
     ~TcpSocket();
 
-    auto SendMsg() -> int;
-    auto RecvMsg() -> std::string;
+    auto Send() -> int;
+    auto Recv() -> std::string;
 
 private:
     auto Readn() -> int;
     auto Writen() -> int;
+
+    
 };
 
 }//namespace mrpc
